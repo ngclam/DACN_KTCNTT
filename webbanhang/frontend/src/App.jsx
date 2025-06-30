@@ -13,7 +13,8 @@ import CancelOrder from './pages/CancelOrder'
 import Profile from './pages/Profile'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import SearchBar from './components/SearchBar';
+import SearchBar from './components/SearchBar'
+import Chatbot from './components/Chatbot'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -38,6 +39,9 @@ const App = () => {
         <Route path='/cancel-order' element={<CancelOrder/>}/>
       </Routes>
       <Footer/>
+      
+      {/* Chatbot luôn hiển thị trên tất cả các trang */}
+      <Chatbot/>
     </div>
   )
 }
