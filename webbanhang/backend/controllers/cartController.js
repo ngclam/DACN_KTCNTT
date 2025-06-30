@@ -66,4 +66,18 @@ const getUserCart = async (req, res) => {
     }
 };
 
-export { addToCart, updateCart, getUserCart };
+//clear user cart
+const clearCart = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        await userModel.findByIdAndUpdate(userId, { cartData: {} });
+        res.json({ success: true, message: 'Giỏ hàng đã được xóa' });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { addToCart, updateCart, getUserCart, clearCart };

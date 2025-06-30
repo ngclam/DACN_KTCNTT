@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useCallback } from 'react'
 import { ShopContext } from '../context/ShopContext';
 import Title from '../components/Title';
 import axios from 'axios';
@@ -9,7 +9,7 @@ const Orders = () => {
 
   const [orderData, setorderData] = useState([])
 
-  const loadOrderData = async () => {
+  const loadOrderData = useCallback(async () => {
     try {
       if(!token){
         return null
@@ -19,16 +19,14 @@ const Orders = () => {
       if(response.data.success){
         let allOrdersItem = []
         response.data.orders.map((order)=>{
-          // Chỉ hiển thị đơn hàng COD hoặc đơn hàng ZaloPay đã thanh toán thành công
-          if (order.paymentMethod === 'COD' || (order.paymentMethod === 'ZaloPay' && order.payment === true)) {
-            order.items.map((item)=>{
-              item['status'] = order.status
-              item['payment'] = order.payment
-              item['paymentMethod'] = order.paymentMethod
-              item['date'] = order.date
-              allOrdersItem.push(item)
-            })
-          }
+          // Backend đã lọc đơn hàng phù hợp, hiển thị tất cả đơn hàng được trả về
+          order.items.map((item)=>{
+            item['status'] = order.status
+            item['payment'] = order.payment
+            item['paymentMethod'] = order.paymentMethod
+            item['date'] = order.date
+            allOrdersItem.push(item)
+          })
         })
         setorderData(allOrdersItem.reverse())    
       }
@@ -37,11 +35,11 @@ const Orders = () => {
     } catch (error) {
       console.log(error)
     }
-    }
+  }, [token, backendUrl])
 
     useEffect(() => {
       loadOrderData()
-  },[token])
+  },[loadOrderData])
 
 
   //Chuyển ngày sang dạng dd/mm/yyyy

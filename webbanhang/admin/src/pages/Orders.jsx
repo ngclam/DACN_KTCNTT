@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { backendUrl, currency } from '../App'
 import { toast } from 'react-toastify'
@@ -8,7 +8,7 @@ const Orders = ({token}) => {
 
     const [orders, setOrders] = useState([])
     
-    const fetchAllOrders = async () => {
+    const fetchAllOrders = useCallback(async () => {
 
         if(!token){
             return null;
@@ -18,11 +18,8 @@ const Orders = ({token}) => {
 
             const response = await axios.post(backendUrl + '/api/order/list',{},{headers:{token}})
             if(response.data.success){
-                // Chỉ hiển thị đơn hàng COD hoặc đơn hàng ZaloPay đã thanh toán thành công
-                const validOrders = response.data.orders.filter(order => 
-                    order.paymentMethod === 'COD' || (order.paymentMethod === 'ZaloPay' && order.payment === true)
-                )
-                setOrders(validOrders)
+                // Backend đã lọc đơn hàng phù hợp, hiển thị tất cả đơn hàng được trả về
+                setOrders(response.data.orders)
             } else {
                 toast.error(response.data.message)
             }
@@ -31,7 +28,7 @@ const Orders = ({token}) => {
             toast.error(error.message)
         }
 
-    }
+    }, [token])
 
     //Cập nhật trạng thái đơn hàng
     const statusHandler = async (event, orderId) => {
@@ -52,7 +49,7 @@ const Orders = ({token}) => {
 
     useEffect(()=>{
         fetchAllOrders();
-    },[token])
+    },[fetchAllOrders])
 
     return(
         <div>

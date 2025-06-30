@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    ward: {
+      type: String,
+      default: "",
+    },
     cartData: {
       type: Object,
       default: {},

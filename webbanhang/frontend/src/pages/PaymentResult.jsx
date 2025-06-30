@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 const PaymentResult = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { backendUrl, token, setCartItems } = useContext(ShopContext)
+  const { backendUrl, token, refreshCart } = useContext(ShopContext)
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
@@ -28,8 +28,8 @@ const PaymentResult = () => {
         // Kiểm tra trạng thái từ URL parameters trước
         if (status) {
           if (status === '1') {
-            // Thanh toán thành công
-            setCartItems({})
+            // Thanh toán thành công - backend đã xóa giỏ hàng, chỉ cần refresh
+            await refreshCart()
             toast.success('Thanh toán thành công!')
             navigate('/orders')
             return
@@ -55,8 +55,8 @@ const PaymentResult = () => {
               console.log('Payment status check:', response.data)
 
               if (response.data.return_code === 1) {
-                // Thanh toán thành công
-                setCartItems({})
+                // Thanh toán thành công - backend đã xóa giỏ hàng, chỉ cần refresh
+                await refreshCart()
                 toast.success('Thanh toán thành công!')
                 navigate('/orders')
               } else if (response.data.return_code === 2) {
@@ -103,7 +103,7 @@ const PaymentResult = () => {
     }
 
     handlePaymentResult()
-  }, [searchParams, backendUrl, token, navigate, setCartItems])
+  }, [searchParams, backendUrl, token, navigate, refreshCart])
 
   if (isChecking) {
     return (

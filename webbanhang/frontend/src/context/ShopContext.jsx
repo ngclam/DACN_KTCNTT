@@ -155,6 +155,27 @@ const ShopContextProvider = (props) => {
         }
     };
 
+    // Hàm làm sạch giỏ hàng
+    const clearCart = async () => {
+        try {
+            setCartItems({});
+            
+            // Nếu có token, cập nhật giỏ hàng trên server
+            if (token) {
+                await axios.post(backendUrl + '/api/cart/clear', {}, { headers: { token } });
+            }
+        } catch (error) {
+            console.log('Clear cart error:', error);
+        }
+    };
+
+    // Hàm refresh giỏ hàng từ server
+    const refreshCart = async () => {
+        if (token) {
+            await getUserCart(token);
+        }
+    };
+
     // Fetch user info
     const fetchUserInfo = async () => {
         try {
@@ -182,6 +203,7 @@ const ShopContextProvider = (props) => {
         }
         if(token) {
             fetchUserInfo()
+            getUserCart(token) // Đồng bộ giỏ hàng mỗi khi có token
         }
     }, [token])
 
@@ -191,7 +213,7 @@ const ShopContextProvider = (props) => {
         cartItems, addToCart, setCartItems,
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
-        setToken,token, checkout, userInfo, fetchUserInfo
+        setToken,token, checkout, userInfo, fetchUserInfo, clearCart, refreshCart
     }
     return (
         <ShopContext.Provider value={value}>

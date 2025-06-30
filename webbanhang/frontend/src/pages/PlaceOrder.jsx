@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
-  const {navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, userInfo} = useContext(ShopContext);
+  const {navigate, backendUrl, token, cartItems, getCartAmount, delivery_fee, products, userInfo, refreshCart} = useContext(ShopContext);
   const[formData, setFormData] = useState({
     firstName:'',
     lastName:'',
@@ -77,7 +77,7 @@ const PlaceOrder = () => {
             { const response = await axios.post(backendUrl + '/api/order/place', orderData, {headers:{token}})
             console.log(response.data.success)
             if(response.data.success){
-              setCartItems({});
+              await refreshCart(); // Backend đã xóa giỏ hàng, chỉ cần refresh
               navigate('/orders');
             } else{
               toast.error(response.data.message)
