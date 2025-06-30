@@ -218,7 +218,7 @@ const Chatbot = () => {
               />
               <button
                 type="submit"
-                className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors flex items-center justify-center"
+                className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors flex items-center justify-center cursor-pointer"
                 disabled={!inputMessage.trim()}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
