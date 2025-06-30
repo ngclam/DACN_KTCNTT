@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 const Login = () => {
 
   const [currentState, setCurrenState] = useState('Đăng nhập');
-  const { token, setToken, navigate, backendUrl} = useContext(ShopContext)
+  const { token, setToken, navigate, backendUrl, setIsAdmin} = useContext(ShopContext)
 
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
@@ -32,6 +32,15 @@ const Login = () => {
         if(response.data.success){
           setToken(response.data.token)
           localStorage.setItem('token',response.data.token)
+          
+          // Kiểm tra nếu là admin
+          if(response.data.isAdmin){
+            setIsAdmin(true)
+            toast.success('Đăng nhập admin thành công!')
+          } else {
+            setIsAdmin(false)
+            toast.success('Đăng nhập thành công!')
+          }
         } else {
           toast.error(response.data.message)
         }

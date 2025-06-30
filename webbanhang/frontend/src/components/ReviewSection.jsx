@@ -4,7 +4,7 @@ import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const ReviewSection = ({ productId }) => {
-    const { token, backendUrl, userInfo } = useContext(ShopContext)
+    const { token, backendUrl, userInfo, isAdmin } = useContext(ShopContext)
     const [reviews, setReviews] = useState([])
     const [userReview, setUserReview] = useState(null)
     const [showReviewForm, setShowReviewForm] = useState(false)
@@ -104,7 +104,7 @@ const ReviewSection = ({ productId }) => {
     // Check if user can delete review (admin or own review)
     const canDeleteReview = (review) => {
         if (!userInfo || !token) return false
-        return userInfo.email === 'admin@gmail.com' || review.userId === userInfo._id
+        return isAdmin || review.userId === userInfo._id
     }
 
     useEffect(() => {

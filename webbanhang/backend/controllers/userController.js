@@ -13,6 +13,17 @@ const loginUser = async (req,res)=>{
         
         const {email,password} = req.body;
 
+        // Kiểm tra nếu là tài khoản admin
+        if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+            const token = jwt.sign({email: email, isAdmin: true}, process.env.JWT_SECRET);
+            return res.json({
+                success: true, 
+                token, 
+                isAdmin: true,
+                message: "Đăng nhập admin thành công"
+            });
+        }
+
         //checking user exists or not
         const user = await userModel.findOne({email});
 
@@ -24,7 +35,12 @@ const loginUser = async (req,res)=>{
 
         if (isMatch) {
             const token = createToken(user._id);
-            res.json({success:true,token});
+            res.json({
+                success: true, 
+                token, 
+                isAdmin: false,
+                message: "Đăng nhập thành công"
+            });
         }
         else{
             res.json({success:false,message:"Email hoặc mật khẩu không hợp lệ."});
@@ -104,14 +120,33 @@ const adminLogin = async (req,res)=>{
 // Route to get user info
 const getUserInfo = async (req, res) => {
     try {
-        const { userId } = req.body;
+        const { userId, isAdmin, adminEmail } = req.body;
 
+        // Nếu là admin
+        if (isAdmin) {
+            return res.json({ 
+                success: true, 
+                user: {
+                    name: "Admin",
+                    email: adminEmail,
+                    isAdmin: true
+                }
+            });
+        }
+
+        // Nếu là user thường
         const user = await userModel.findById(userId).select('-password');
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
 
-        res.json({ success: true, user });
+        res.json({ 
+            success: true, 
+            user: {
+                ...user.toObject(),
+                isAdmin: false
+            }
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
@@ -148,4 +183,16 @@ const updateProfile = async (req, res) => {
     }
 }
 
-export { loginUser, registerUser, adminLogin, getUserInfo, updateProfile };
+// Get all users (admin only)
+const getAllUsers = async (req, res) => {
+    try {
+        // Bao gồm cả password (đã hash) để admin có thể xem
+        const users = await userModel.find().sort({ createdAt: -1 });
+        res.json({ success: true, users });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export { loginUser, registerUser, adminLogin, getUserInfo, updateProfile, getAllUsers };

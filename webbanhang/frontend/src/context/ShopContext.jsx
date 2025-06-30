@@ -16,12 +16,19 @@ const ShopContextProvider = (props) => {
     const [products, setProducts] = useState([]);
     const [token,setToken] = useState('')
     const [userInfo, setUserInfo] = useState(null)
+    const [isAdmin, setIsAdmin] = useState(false)
     const navigate = useNavigate();
 
     const addToCart = async (itemId, size)=>{
 
         if (!size) {
             toast.error('Hãy chọn Size');
+            return;
+        }
+
+        // Admin không thể thêm vào giỏ hàng
+        if (isAdmin) {
+            toast.error('Admin không thể thêm sản phẩm vào giỏ hàng');
             return;
         }
 
@@ -46,7 +53,9 @@ const ShopContextProvider = (props) => {
                 await axios.post(backendUrl + '/api/cart/add', {itemId, size}, {headers: {token}})
             } catch (error) {
                 console.log(error);
-                toast.error(error.message)
+                if (!error.response?.data?.message?.includes('Admin')) {
+                    toast.error(error.response?.data?.message || error.message)
+                }
             }
         }
 
@@ -126,11 +135,14 @@ const ShopContextProvider = (props) => {
             
             const response = await axios.post(backendUrl + '/api/cart/get',{}, {headers: {token}})
             if(response.data.success){
-                setCartItems(response.data.cartData)
+                setCartItems(response.data.cartData || {})
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.message)
+            // Không hiển thị lỗi cho admin vì admin không có giỏ hàng
+            if (!error.response?.data?.message?.includes('Admin')) {
+                toast.error(error.message)
+            }
         }
      }
 
@@ -186,6 +198,7 @@ const ShopContextProvider = (props) => {
             })
             if (response.data.success) {
                 setUserInfo(response.data.user)
+                setIsAdmin(response.data.user.isAdmin || false)
             }
         } catch (error) {
             console.log(error)
@@ -204,6 +217,9 @@ const ShopContextProvider = (props) => {
         if(token) {
             fetchUserInfo()
             getUserCart(token) // Đồng bộ giỏ hàng mỗi khi có token
+        } else {
+            // Reset admin status khi không có token
+            setIsAdmin(false)
         }
     }, [token])
 
@@ -213,7 +229,8 @@ const ShopContextProvider = (props) => {
         cartItems, addToCart, setCartItems,
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
-        setToken,token, checkout, userInfo, fetchUserInfo, clearCart, refreshCart
+        setToken,token, checkout, userInfo, fetchUserInfo, clearCart, refreshCart,
+        isAdmin, setIsAdmin
     }
     return (
         <ShopContext.Provider value={value}>

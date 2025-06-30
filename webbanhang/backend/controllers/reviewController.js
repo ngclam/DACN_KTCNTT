@@ -74,11 +74,7 @@ const getProductReviews = async (req, res) => {
 const deleteReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        const { userId } = req.body;
-
-        // Get user info to check if admin
-        const user = await userModel.findById(userId);
-        const isAdmin = user && user.email === 'admin@gmail.com';
+        const { userId, isAdmin, adminEmail } = req.body;
 
         // Find the review
         const review = await reviewModel.findById(reviewId);
@@ -89,8 +85,17 @@ const deleteReview = async (req, res) => {
             });
         }
 
-        // Check if user owns the review or is admin
-        if (review.userId.toString() !== userId && !isAdmin) {
+        // Check if user is admin (from token)
+        if (isAdmin) {
+            await reviewModel.findByIdAndDelete(reviewId);
+            return res.json({ 
+                success: true, 
+                message: "Đánh giá đã được admin xóa" 
+            });
+        }
+
+        // Check if user owns the review (for regular users)
+        if (!userId || review.userId.toString() !== userId) {
             return res.json({ 
                 success: false, 
                 message: "Không có quyền xóa đánh giá này" 
