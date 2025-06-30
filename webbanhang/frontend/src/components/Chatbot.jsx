@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,13 +11,24 @@ const Chatbot = () => {
     }
   ])
   const [inputMessage, setInputMessage] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const messagesEndRef = useRef(null)
+
+  // Tự động cuộn xuống khi có tin nhắn mới
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   // Các câu trả lời tự động đơn giản
   const getBotResponse = (userMessage) => {
     const message = userMessage.toLowerCase()
     
     if (message.includes('chào') || message.includes('hello') || message.includes('hi') || message.includes('xin chào')) {
-      return "Xin chào! Tôi là trợ lý ảo của cửa hàng E-Commerce. Bạn cần hỗ trợ gì không?"
+      return "Xin chào! Tôi là trợ lý ảo của cửa hàng E-Commerce. Bạn cần hỗ trợ gì không ạ?"
     }
     
     if (message.includes('sản phẩm') || message.includes('hàng hóa') || message.includes('shop')) {
@@ -25,18 +36,18 @@ const Chatbot = () => {
     }
     
     if (message.includes('giao hàng') || message.includes('vận chuyển') || message.includes('ship')) {
-      return "🚚 Chúng tôi hỗ trợ giao hàng toàn quốc:\n• Giao hàng nhanh: 1-2 ngày\n• Giao hàng tiêu chuẩn: 3-5 ngày\n• Miễn phí ship cho đơn hàng trên 500.000đ"
+      return "🚚 Chúng tôi có hỗ trợ giao hàng toàn quốc:\n• Giao hàng nhanh từ: 2-3 ngày\n• Miễn phí ship cho đơn hàng trên 500.000đ"
     }
     
     if (message.includes('thanh toán') || message.includes('payment') || message.includes('trả tiền')) {
-      return "💳 Chúng tôi hỗ trợ các hình thức thanh toán:\n• ZaloPay\n• COD (Thanh toán khi nhận hàng)"
+      return "💳 Chúng tôi hỗ trợ các hình thức thanh toán như:\n• ZaloPay\n• COD (Thanh toán khi nhận hàng)"
     }
     
     if (message.includes('liên hệ') || message.includes('contact') || message.includes('hotline')) {
-      return "📞 Liên hệ với chúng tôi:\n• Hotline: 1900-xxxx\n• Email: support@ecommerce.com\n• Hoặc qua trang Liên hệ của website"
+      return "📞 Liên hệ với chúng tôi:\n• Hotline: 0904.512.575\n• Email: contact@gmail.com.com\n• Hoặc qua trang Liên hệ của website"
     }
     
-    if (message.includes('size') || message.includes('kích thước') || message.includes('số đo')) {
+    if (message.includes('size') || message.includes('kích thước') || message.includes('số đo') || message.includes('kích cỡ')) {
       return "📏 Về size sản phẩm:\n• Xem bảng size chi tiết tại mỗi sản phẩm\n• Tư vấn size miễn phí\n• Hỗ trợ đổi size trong 7 ngày"
     }
     
@@ -52,12 +63,12 @@ const Chatbot = () => {
       return "📦 Về đơn hàng:\n• Theo dõi đơn hàng tại trang Đơn hàng\n• Xác nhận đơn hàng qua email/SMS\n• Hỗ trợ hủy/sửa đơn trước khi giao"
     }
     
-    if (message.includes('tài khoản') || message.includes('đăng ký') || message.includes('login')) {
+    if (message.includes('tài khoản') || message.includes('đăng ký') || message.includes('login') || message.includes('account') || message.includes('acc')) {
       return "👤 Tài khoản của bạn:\n• Đăng ký miễn phí để mua hàng\n• Theo dõi đơn hàng dễ dàng\n• Nhận thông báo ưu đãi đặc biệt"
     }
     
     // Phản hồi mặc định với gợi ý
-    return "Cảm ơn bạn đã liên hệ! 😊\n\nTôi có thể hỗ trợ bạn về:\n• Sản phẩm và mua hàng\n• Giao hàng và thanh toán\n• Đổi trả và bảo hành\n• Khuyến mãi hiện tại\n\nHoặc liên hệ trực tiếp qua trang Contact nhé!"
+    return "Cảm ơn bạn đã liên hệ! 😊\n\nTôi có thể hỗ trợ bạn về:\n• Sản phẩm và mua hàng\n• Giao hàng và thanh toán\n• Đổi trả và bảo hành\n• Khuyến mãi hiện tại\n\nHoặc liên hệ trực tiếp qua trang Liên hệ nhé!"
   }
 
   const handleSendMessage = (e) => {
@@ -75,7 +86,10 @@ const Chatbot = () => {
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
 
-    // Sau 1 giây thêm phản hồi của bot
+    // Hiển thị typing indicator
+    setIsTyping(true)
+
+    // Sau 1-2 giây thêm phản hồi của bot
     setTimeout(() => {
       const botMessage = {
         id: Date.now() + 1,
@@ -84,7 +98,8 @@ const Chatbot = () => {
         timestamp: new Date()
       }
       setMessages(prev => [...prev, botMessage])
-    }, 1000)
+      setIsTyping(false)
+    }, 1000 + Math.random() * 1000) // Random từ 1-2 giây để tự nhiên hơn
   }
 
   const formatTime = (timestamp) => {
@@ -170,8 +185,25 @@ const Chatbot = () => {
                 </div>
               </div>
             ))}
+            
             {/* Typing indicator khi bot đang trả lời */}
-            {/* Có thể thêm sau */}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-white text-gray-800 shadow-sm border p-3 rounded-lg">
+                  <div className="flex items-center space-x-1">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                    <span className="text-xs text-gray-500 ml-2">Đang trả lời...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Phần tử để cuộn xuống */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
